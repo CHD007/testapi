@@ -29,7 +29,7 @@ public class AuthServerOAuth2Config extends AuthorizationServerConfigurerAdapter
                 .secret(passwordEncoder.encode("secret"))
                 .authorizedGrantTypes("client_credentials")
                 .accessTokenValiditySeconds(expiration)
-                .scopes("read", "write");
+                .scopes("/payments/.*");
     }
 
     @Override

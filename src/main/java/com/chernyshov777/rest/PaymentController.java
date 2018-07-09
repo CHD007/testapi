@@ -1,8 +1,12 @@
 package com.chernyshov777.rest;
 
-import com.chernyshov777.domain.Payment;
-import com.chernyshov777.domain.PaymentResponse;
-import com.chernyshov777.domain.State;
+import com.chernyshov777.data.DestinationRepository;
+import com.chernyshov777.data.MessageRepository;
+import com.chernyshov777.domain.*;
+import com.chernyshov777.events.MessageReceivedEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +25,15 @@ import java.util.Random;
 import java.util.TimeZone;
 
 @RestController
-public class PaymentController {
+public class PaymentController implements ApplicationEventPublisherAware {
+
+    @Autowired
+    private DestinationRepository destinationRepository;
+
+    @Autowired
+    private MessageRepository messageRepository;
+
+    private ApplicationEventPublisher applicationEventPublisher;
 
     @PreAuthorize("#oauth2.hasScope('payments/.*')")
     @RequestMapping(method = RequestMethod.POST, value = "/payments/payment",
@@ -42,6 +54,27 @@ public class PaymentController {
             return new ResponseEntity<>(paymentResponse, HttpStatus.BAD_REQUEST);
         }
         paymentResponse.setState(State.CREATED);
+
+        createMessageToSendItLatter(payment);
+
         return new ResponseEntity<>(paymentResponse, HttpStatus.OK);
+    }
+
+    /**
+     * Save destination entity based on payment destination parameter.
+     * Save message and publish event about new message creation.
+     *
+     * @param payment payment which used to create destination and message
+     */
+    private void createMessageToSendItLatter(Payment payment) {
+        Destination destination = destinationRepository.save(new Destination(payment.getNotificationUrl()));
+        Message simpleMsg = messageRepository.save(new Message("simple msg",
+                MediaType.APPLICATION_JSON_VALUE, destination));
+        applicationEventPublisher.publishEvent(new MessageReceivedEvent(this, simpleMsg));
+    }
+
+    @Override
+    public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 }

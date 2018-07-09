@@ -19,7 +19,6 @@ public class DestinationRepositoryTest extends AbstractRepositoryTest {
     public void setDestinationOnlineOfflineTest() {
         logger.debug("setDestinationOnlineTest");
 
-        // Retrieve trelloDest to check the online flag
         Optional<Destination> result = destinationRepository.findById(googleDest.getId());
         assertTrue(result.isPresent());
         assertThat(result.get().isOnline()).isTrue();

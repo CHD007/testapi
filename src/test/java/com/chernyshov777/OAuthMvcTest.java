@@ -57,7 +57,7 @@ public class OAuthMvcTest {
         payment.setTransaction(new Transaction(1L, new Amount(1000, "USD"), "test"));
     }
 
-    private String obtainAccessToken() throws Exception {
+    protected String obtainAccessToken() throws Exception {
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "client_credentials");

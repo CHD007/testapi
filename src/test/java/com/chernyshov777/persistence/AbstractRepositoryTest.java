@@ -12,19 +12,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
-@DataJpaTest
 @SpringBootTest(classes = Application.class)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @EnableAutoConfiguration(exclude = { SecurityAutoConfiguration.class})
-@ActiveProfiles(value = "test")
 public abstract class AbstractRepositoryTest {
 
     final Logger logger = LoggerFactory.getLogger(getClass());
@@ -48,9 +44,9 @@ public abstract class AbstractRepositoryTest {
 
         googleDest = new Destination("http://www.google.com");
 
-        destinationRepository.save(googleDest);
+        Destination savedDestination = destinationRepository.save(googleDest);
 
-        googleMessage = new Message("#safe=off&q=hootsuite", "text/html", googleDest);
+        googleMessage = new Message("#safe=off&q=hootsuite", "text/html", savedDestination);
 
         messageRepository.save(googleMessage);
     }

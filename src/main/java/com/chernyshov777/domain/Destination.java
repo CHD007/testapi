@@ -12,7 +12,7 @@ public class Destination {
     @Column(nullable = false)
     private String url;
 
-    @OneToMany(mappedBy = "destination", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "destination", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     private List<Message> messages;
 
     @Column(nullable = false)
@@ -37,6 +37,10 @@ public class Destination {
 
     public Boolean isOnline() {
         return online;
+    }
+
+    public List<Message> getMessages() {
+        return messages;
     }
 
     @Override

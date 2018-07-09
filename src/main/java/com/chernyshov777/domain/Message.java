@@ -1,58 +1,66 @@
 package com.chernyshov777.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
+
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
 
 @Entity
+@Data
 public class Message {
     /*Message timeout equals three days*/
     private final static long MESSAGE_TIMEOUT = 3 * 24 * 60 * 60 * 1000;
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
+    @JsonIgnore
     private Long id;
 
-    @Column(nullable = false)
-    private String messageBody;
+    @Column
+    @NotNull
+    private String currency;
+    @Column
+    @NotNull
+    private double amount;
+    @Column
+    @NotNull
+    @JsonProperty("id")
+    private String paymentId;
+    @Column
+    @NotNull
+    @JsonProperty("external_id")
+    private long externalId;
+    @Column
+    @NotNull
+    private State status;
+    @Column
+    @NotNull
+    @JsonProperty("sha2sig")
+    private String sha2;
 
     @Column(nullable = false)
+    @JsonIgnore
     private String contentType;
 
     @Column(nullable = false)
+    @JsonIgnore
     private Timestamp timestamp;
 
     @ManyToOne(optional = false)
+    @JsonIgnore
     private Destination destination;
 
     protected Message() {
     }
 
-    public Message(String messageBody, String contentType, Destination destination) {
+    public Message(String contentType, Destination destination) {
         super();
-        this.messageBody = messageBody;
         this.contentType = contentType;
         this.timestamp = new Timestamp(System.currentTimeMillis());
         this.destination = destination;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getMessageBody() {
-        return messageBody;
-    }
-
-    public String getContentType() {
-        return contentType;
-    }
-
-    public Timestamp getTimestamp() {
-        return timestamp;
-    }
-
-    public Destination getDestination() {
-        return destination;
     }
 
     public Long getDestinationId() {
@@ -94,6 +102,6 @@ public class Message {
 
     @Override
     public String toString() {
-        return String.format("Message[id=%d, messageBody='%s', contentType='%s']", id, messageBody, contentType);
+        return String.format("Message[id=%d, contentType='%s']", id, contentType);
     }
 }

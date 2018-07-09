@@ -56,7 +56,7 @@ public class WebhookMsgProcessor {
     @Scheduled(cron="0 0 */3 * * *") // Run at minute 0 past every 3th hour ~ 25 times in 3 days
     public void scheduledMessagesProcessor() {
 
-        destinationRepository.findAll().forEach(destination -> processMessagesForDestination(destination));
+        destinationRepository.findAll().forEach(this::processMessagesForDestination);
     }
 
     private void processMessagesForDestination(Destination destination) {
@@ -80,9 +80,9 @@ public class WebhookMsgProcessor {
     private void sendMessage(Message message) throws MessageProcessorException {
         try {
             HttpHeaders headers = new HttpHeaders();
-            headers.set(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded");
+            headers.set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
             headers.add("Accept", MediaType.APPLICATION_JSON_VALUE);
-            HttpEntity<String> request = new HttpEntity<>(message.getMessageBody() ,headers);
+            HttpEntity<Message> request = new HttpEntity<>(message, headers);
 
             Thread.sleep(500); // wait 0.5 second before send message
 
@@ -102,6 +102,8 @@ public class WebhookMsgProcessor {
             throw new MessageProcessorException(ex.getMessage());
         }
     }
+
+
 
     private void onSendMessageSuccess(Message message) {
         logger.debug("Sent Message {}", message.getId());

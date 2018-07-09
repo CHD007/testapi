@@ -55,7 +55,7 @@ public class PaymentController implements ApplicationEventPublisherAware {
         }
         paymentResponse.setState(State.CREATED);
 
-        createMessageToSendItLatter(payment);
+        createMessageToSendItLatter(payment, paymentResponse);
 
         return new ResponseEntity<>(paymentResponse, HttpStatus.OK);
     }
@@ -66,10 +66,17 @@ public class PaymentController implements ApplicationEventPublisherAware {
      *
      * @param payment payment which used to create destination and message
      */
-    private void createMessageToSendItLatter(Payment payment) {
+    private void createMessageToSendItLatter(Payment payment, PaymentResponse paymentResponse) {
         Destination destination = destinationRepository.save(new Destination(payment.getNotificationUrl()));
-        Message simpleMsg = messageRepository.save(new Message("simple msg",
-                MediaType.APPLICATION_JSON_VALUE, destination));
+        Message message = new Message(MediaType.APPLICATION_JSON_VALUE, destination);
+        message.setAmount(payment.getTransaction().getAmount().getValue());
+        message.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        message.setCurrency(payment.getTransaction().getAmount().getCurrency());
+        message.setSha2("generatedSha2");
+        message.setPaymentId(paymentResponse.getId());
+        message.setExternalId(payment.getTransaction().getExternalId());
+        message.setStatus(paymentResponse.getState());
+        Message simpleMsg = messageRepository.save(message);
         applicationEventPublisher.publishEvent(new MessageReceivedEvent(this, simpleMsg));
     }
 

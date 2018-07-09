@@ -5,6 +5,7 @@ import com.chernyshov777.data.DestinationRepository;
 import com.chernyshov777.data.MessageRepository;
 import com.chernyshov777.domain.Destination;
 import com.chernyshov777.domain.Message;
+import com.chernyshov777.domain.State;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,7 +48,14 @@ public abstract class AbstractRepositoryTest {
 
         Destination savedDestination = destinationRepository.save(googleDest);
 
-        googleMessage = new Message("#safe=off&q=hootsuite", "text/html", savedDestination);
+        googleMessage = new Message("text/html", savedDestination);
+        googleMessage.setAmount(123);
+        googleMessage.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        googleMessage.setCurrency("currency");
+        googleMessage.setSha2("sha2");
+        googleMessage.setPaymentId("asdf");
+        googleMessage.setExternalId(123123L);
+        googleMessage.setStatus(State.CREATED);
 
         messageRepository.save(googleMessage);
     }

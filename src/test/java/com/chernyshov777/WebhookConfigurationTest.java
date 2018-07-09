@@ -1,10 +1,6 @@
 package com.chernyshov777;
 
 import com.chernyshov777.domain.*;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
@@ -24,6 +22,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(properties = {"management.port=0"})
+@EnableAutoConfiguration(exclude = { SecurityAutoConfiguration.class})
 public class WebhookConfigurationTest {
 
     private static final Logger logger = LoggerFactory.getLogger(WebhookConfigurationTest.class);
@@ -53,8 +52,7 @@ public class WebhookConfigurationTest {
         logger.debug("shouldReturn200WhenSendingRequestToController");
 
         HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded");
-        headers.add("Accept", MediaType.APPLICATION_JSON_VALUE);
+        headers.set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         headers.add("Accept", MediaType.APPLICATION_JSON_VALUE);
         HttpEntity<Payment> request = new HttpEntity<>(payment ,headers);
 
@@ -76,43 +74,4 @@ public class WebhookConfigurationTest {
         assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
-
-    @Test
-    public void tokenTest() {
-        logger.debug("shouldReturnAccessToken");
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded");
-        headers.add("Accept", MediaType.APPLICATION_JSON_VALUE);
-        headers.add("Accept-Language", "en_US");
-        headers.add("Authorization", "Basic dXNlcjpzZWNyZXQ=");
-        headers.add("Content-Type", "application/x-www-form-urlencoded");
-        HttpEntity<TokenRequestBody> request = new HttpEntity<>(new TokenRequestBody("client_credentials"), headers);
-        ResponseEntity<TokenRequestBody> tokenRequestBodyResponseEntity =
-                restTemplate.postForEntity("http://localhost:" + port + "/oauth2/token",
-                        request,
-                        TokenRequestBody.class);
-        assertThat(tokenRequestBodyResponseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    private class TokenRequestBody {
-        @JsonProperty("grant_type")
-        private String grantType;
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    private class TokenResponseBody {
-        private String scope;
-        @JsonProperty("Access-Token")
-        private String accessToken;
-        @JsonProperty("token_type")
-        private String tokenType;
-        @JsonProperty("expires_in")
-        private long expiresIn;
-    }
 }
